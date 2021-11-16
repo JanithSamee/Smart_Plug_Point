@@ -193,7 +193,7 @@
 				<hr />
 				<h1>Settings</h1>
 
-				<form class="form-inline" action="/action_page.php">
+				<form class="form-inline" onsubmit="{return changeCredentials(this)}">
 					<center>
 						<label for="ssid">SSID:</label>
 						<input type="text" id="ssid" placeholder="Enter SSID" name="ssid" />
@@ -283,6 +283,20 @@
 					connection.send("switch|" + value);
 				} catch (error) {
 					alert("Faild");
+				}
+			}
+			function changeCredentials(value) {
+				let ssid = document.getElementById("ssid").value.trim();
+				let password = document.getElementById("pwd").value.trim();
+
+				if (ssid.length > 3 && ssid.length < 25 && ssid.length > 6 && ssid.length < 25) {
+					try {
+						connection.send("wifi|" + ssid + "|" + password);
+					} catch (error) {
+						alert("Faild");
+					}
+				} else {
+					alert("3<length of ssid <25 and 6<length of password <25");
 				}
 			}
 			try {

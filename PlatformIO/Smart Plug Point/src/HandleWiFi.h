@@ -12,6 +12,7 @@ class HandleWiFi
 public:
     HandleWiFi(HandleEEPROM eeprom);
     IPAddress getCurrentIp();
+    int changeCredentials(String ssid, String password, HandleEEPROM eeprom);
 
 private:
     String APSSID = "Smart Plug Point";

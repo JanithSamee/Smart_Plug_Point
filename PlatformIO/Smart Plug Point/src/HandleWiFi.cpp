@@ -1,5 +1,6 @@
 #include "HandleWiFi.h"
 #include "Arduino.h"
+#include "HandleEEPROM.h"
 
 HandleWiFi::HandleWiFi(HandleEEPROM eeprom)
 {
@@ -19,4 +20,19 @@ HandleWiFi::HandleWiFi(HandleEEPROM eeprom)
 IPAddress HandleWiFi::getCurrentIp()
 {
     return WiFi.localIP();
+}
+
+int HandleWiFi::changeCredentials(String ssid, String password, HandleEEPROM eeprom)
+{
+    bool res1 = eeprom.writeEEPROM(0, ssid);
+    delay(200);
+    bool res2 = eeprom.writeEEPROM(26, password);
+    if (res1 && res2)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
 }

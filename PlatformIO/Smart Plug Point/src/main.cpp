@@ -14,12 +14,29 @@
 #include "SecondaryDisplayDriver.h"
 
 //Initialize the classes
-Measurement measurement(26, 24);
+Measurement measurement(25, 36);
 AsyncWebServer server(80);
 WebSocketsServer websockets(81);
 Ticker sender;
 
+
 //set the bulb on off request listner
+
+int changeCredentials(String ssid, String password, HandleEEPROM eeprom)
+{
+  bool res1 = eeprom.writeEEPROM(0, ssid);
+  delay(200);
+  bool res2 = eeprom.writeEEPROM(26, password);
+  if (res1 && res2)
+  {
+    return 1;
+  }
+  else
+  {
+    return 0;
+  }
+}
+
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
 {
 
@@ -42,18 +59,26 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
 
     if (message == "switch|off")
     {
-      digitalWrite(2, LOW);
+      digitalWrite(27, LOW);
     }
 
     if (message == "switch|on")
     {
-      digitalWrite(2, HIGH);
+      digitalWrite(27, HIGH);
+    }
+    if (message.startsWith("wifi"))
+    {
+      String credentials = message.substring(5, message.length());
+      int slicer = credentials.indexOf("|");
+      String ssid = credentials.substring(0, slicer);
+      String password = credentials.substring(slicer + 1);
+      //int res = changeCredentials(ssid, password, handleEEPROM);
     }
   }
 }
 
 //send current and voltage measurement to server
-  void send_data()
+void send_data()
 {
   String res = "{\"voltage\":";
   float voltage = measurement.getVoltageValue();
@@ -64,23 +89,21 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
   res += "}";
   websockets.broadcastTXT(res);
   Serial.println(res);
-  
 }
 void setup()
 {
   //initalize input and output pins
-  pinMode(2, OUTPUT);
+  pinMode(27, OUTPUT);
 
   SecondaryDisplayDriver secondaryDisplayDriver;
   secondaryDisplayDriver.showWelcome();
   delay(1000);
   secondaryDisplayDriver.showInitalizing();
 
-  //initalize the EEPROM of device
-  HandleEEPROM handleEEPROM(512);
-
   //Start the serial port
   Serial.begin(115200);
+  //initalize the EEPROM of device
+HandleEEPROM handleEEPROM(512);
 
   //Start WIFI
   HandleWiFi HandleWiFi(handleEEPROM);
